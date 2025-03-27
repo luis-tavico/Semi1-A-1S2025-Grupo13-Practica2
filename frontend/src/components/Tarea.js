@@ -5,9 +5,9 @@ import { List, Folder, X, Save, CalendarDays } from 'lucide-react';
 const Tarea = () => {
     const { id } = useParams();
     const [tarea, setTarea] = useState(null);
-    const [titulo, setTitulo] = useState('');
-    const [descripcion, setDescripcion] = useState('');
-    const [fecha, setFecha] = useState(new Date().toISOString().split('T')[0]);
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [creationDate, setCreationDate] = useState(new Date().toISOString().split('T')[0]);
     const [menuAbierto, setMenuAbierto] = useState(false);
     const navigate = useNavigate();
     const API_URL = process.env.REACT_APP_API_URL;
@@ -23,18 +23,18 @@ const Tarea = () => {
                 })
                 .then(data => {
                     setTarea(data);
-                    setTitulo(data.titulo);
-                    setDescripcion(data.descripcion);
-                    setFecha(data.fecha);
+                    setTitle(data.title);
+                    setDescription(data.description);
+                    setCreationDate(data.creation_date);
                 })
                 .catch(error => {
                     console.error('Error al cargar la tarea:', error);
                 });
         } else {
             setTarea(null);
-            setTitulo('');
-            setDescripcion('');
-            setFecha(new Date().toISOString().split('T')[0]);
+            setTitle('');
+            setDescription('');
+            setCreationDate(new Date().toISOString().split('T')[0]);
         }
     }, [id, API_URL]);
 
@@ -42,9 +42,9 @@ const Tarea = () => {
         e.preventDefault();
 
         const tareaData = {
-            titulo,
-            descripcion,
-            fecha,
+            title: title,
+            description,
+            creation_date,
         };
 
         const method = id ? 'PUT' : 'POST';
@@ -120,14 +120,14 @@ const Tarea = () => {
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
-                            <label htmlFor="titulo" className="block text-sm font-medium mb-2">
+                            <label htmlFor="title" className="block text-sm font-medium mb-2">
                                 Título de la Tarea
                             </label>
                             <input
                                 type="text"
-                                id="titulo"
-                                value={titulo}
-                                onChange={(e) => setTitulo(e.target.value)}
+                                id="title"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
                                 required
                                 className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"
                                 placeholder="Ingresa el título de la tarea"
@@ -135,13 +135,13 @@ const Tarea = () => {
                         </div>
 
                         <div>
-                            <label htmlFor="descripcion" className="block text-sm font-medium mb-2">
+                            <label htmlFor="description" className="block text-sm font-medium mb-2">
                                 Descripción
                             </label>
                             <textarea
-                                id="descripcion"
-                                value={descripcion}
-                                onChange={(e) => setDescripcion(e.target.value)}
+                                id="description"
+                                value={description}
+                                onChange={(e) => setDescription(e.target.value)}
                                 rows={4}
                                 className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 outline-none"
                                 placeholder="Describe los detalles de la tarea"
@@ -149,16 +149,16 @@ const Tarea = () => {
                         </div>
 
                         <div>
-                            <label htmlFor="fecha" className="block text-sm font-medium mb-2">
+                            <label htmlFor="creationDate" className="block text-sm font-medium mb-2">
                                 Fecha de la Tarea
                             </label>
                             <div className="relative">
                                 <CalendarDays className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500" size={20} />
                                 <input
                                     type="date"
-                                    id="fecha"
-                                    value={fecha}
-                                    onChange={(e) => setFecha(e.target.value)}
+                                    id="creationDate"
+                                    value={creationDate}
+                                    onChange={(e) => setCreationDate(e.target.value)}
                                     required
                                     className="w-full bg-gray-800 border border-gray-700 rounded-lg p-3 pl-10 focus:ring-2 focus:ring-blue-500 outline-none"
                                 />

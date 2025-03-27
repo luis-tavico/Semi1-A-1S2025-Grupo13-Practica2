@@ -4,7 +4,7 @@ import { List, Folder,  Trash2, LogOut, Circle, CheckCircle2, Plus, Edit } from 
 
 const Tareas = () => {
     const [menuAbierto, setMenuAbierto] = useState(false);
-    const [tareas, setTareas] = useState([]);
+    const [tasks, setTasks] = useState([]);
     const navigate = useNavigate();
     const API_URL = process.env.REACT_APP_API_URL;
 
@@ -14,7 +14,7 @@ const Tareas = () => {
                 const response = await fetch(`${API_URL}/tareas`);
                 if (response.ok) {
                     const data = await response.json();
-                    setTareas(data);
+                    setTasks(data);
                 } else {
                     console.error('Error al obtener tareas:', response.statusText);
                     alert('Error al obtener tareas. Inténtalo de nuevo.');
@@ -30,7 +30,7 @@ const Tareas = () => {
 
     const toggleCompletada = async (id) => {
         try {
-            const tarea = tareas.find(tarea => tarea.id === id);
+            const tarea = tasks.find(tarea => tarea.id === id);
             const response = await fetch(`${API_URL}/tareas/${id}`, {
                 method: 'PUT',
                 headers: {
@@ -40,7 +40,7 @@ const Tareas = () => {
             });
 
             if (response.ok) {
-                setTareas(tareas.map(tarea =>
+                setTasks(tasks.map(tarea =>
                     tarea.id === id ? { ...tarea, completada: !tarea.completada } : tarea
                 ));
             } else {
@@ -65,7 +65,7 @@ const Tareas = () => {
             });
 
             if (response.ok) {
-                setTareas(tareas.filter(tarea => tarea.id !== id));
+                setTasks(tasks.filter(tarea => tarea.id !== id));
             } else {
                 console.error('Error al eliminar tarea:', response.statusText);
                 alert('Error al eliminar tarea. Inténtalo de nuevo.');
@@ -126,7 +126,7 @@ const Tareas = () => {
                     </div>
 
                     <div className="space-y-4">
-                        {tareas.map((tarea) => (
+                        {tasks.map((tarea) => (
                             <div
                                 key={tarea.id}
                                 className={`
@@ -152,11 +152,11 @@ const Tareas = () => {
                                         className={`text-lg font-semibold ${tarea.completada ? 'line-through text-gray-500' : ''
                                             }`}
                                     >
-                                        {tarea.titulo}
+                                        {tarea.title}
                                     </h3>
-                                    <p className="text-sm text-gray-400">{tarea.descripcion}</p>
+                                    <p className="text-sm text-gray-400">{tarea.description}</p>
                                     <span className="text-xs text-gray-500 mt-1">
-                                        Creada el: {tarea.fechaCreacion}
+                                        Creada el: {tarea.creation_date}
                                     </span>
                                 </div>
 

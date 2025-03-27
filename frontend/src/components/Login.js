@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Lock, User } from 'lucide-react';
 
 const Login = () => {
-  const [user, setUser] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const API_URL = process.env.REACT_APP_API_URL;
@@ -17,7 +17,7 @@ const Login = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ user, password }),
+        body: JSON.stringify({ username, password }),
       });
 
       const data = await response.json();
@@ -46,8 +46,8 @@ const Login = () => {
             <input
               type="text"
               placeholder="Nombre de usuario"
-              value={user}
-              onChange={(e) => setUser(e.target.value)}
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               className="w-full pl-10 px-4 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               required
             />

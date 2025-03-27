@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Camera, User, Mail, Lock, KeyRound } from 'lucide-react';
 
 const Registro = () => {
-	const [profileImage, setProfileImage] = useState(null);
-	const [user, setUser] = useState('');
+	const [profilePicture, setProfilePicture] = useState(null);
+	const [username, setUsername] = useState('');
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [confirmPassword, setConfirmPassword] = useState('');
@@ -14,7 +14,7 @@ const Registro = () => {
 	const handleImageUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
-            setProfileImage(file);
+            setProfilePicture(file);
         }
     };
 
@@ -28,8 +28,8 @@ const Registro = () => {
 
 		try {
 			const formData = new FormData();
-			formData.append('profileImage', profileImage);
-			formData.append('user', user);
+			formData.append('profile_picture', profilePicture);
+			formData.append('username', username);
 			formData.append('email', email);
 			formData.append('password', password);
 
@@ -62,17 +62,17 @@ const Registro = () => {
 							type="file"
 							accept="image/*"
 							className="hidden"
-							id="profileImage"
+							id="profilePicture"
 							onChange={handleImageUpload}
 						/>
 						<label
-							htmlFor="profileImage"
+							htmlFor="profilePicture"
 							className="cursor-pointer"
 						>
-							{profileImage ? (
+							{profilePicture ? (
 								<img
-									src={URL.createObjectURL(profileImage)}
-									alt="Perfil"
+									src={URL.createObjectURL(profilePicture)}
+									alt="imagen perfil"
 									className="w-24 h-24 rounded-full object-cover border-4 border-gray-600"
 								/>
 							) : (
@@ -93,8 +93,8 @@ const Registro = () => {
 						<input
 							type="text"
 							placeholder="Nombre de usuario"
-							value={user}
-							onChange={(e) => setUser(e.target.value)}
+							value={username}
+							onChange={(e) => setUsername(e.target.value)}
 							className="w-full pl-10 px-4 py-2 bg-gray-700 text-white rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
 							required
 						/>

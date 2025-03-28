@@ -1,17 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { List, Folder,  Trash2, LogOut, Circle, CheckCircle2, Plus, Edit } from 'lucide-react';
+import { List, Folder, Trash2, LogOut, Circle, CheckCircle2, Plus, Edit } from 'lucide-react';
 
 const Tareas = () => {
     const [menuAbierto, setMenuAbierto] = useState(false);
     const [tasks, setTasks] = useState([]);
     const navigate = useNavigate();
+    const token = localStorage.getItem('token');
     const API_URL = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
         const fetchTareas = async () => {
+            {/*
+            if (!token) {
+                console.error('Token no encontrado.');
+                alert('Usuario no autenticado. Inicia sesión nuevamente.');
+                navigate('/login');
+                return;
+            }
+            */}
             try {
-                const response = await fetch(`${API_URL}/tareas`);
+                const response = await fetch(`${API_URL}/api/tasks/`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
                 if (response.ok) {
                     const data = await response.json();
                     setTasks(data);
@@ -26,22 +39,23 @@ const Tareas = () => {
         };
 
         fetchTareas();
-    }, [API_URL]);
+    }, [API_URL, navigate]);
 
     const toggleCompletada = async (id) => {
         try {
-            const tarea = tasks.find(tarea => tarea.id === id);
-            const response = await fetch(`${API_URL}/tareas/${id}`, {
+            const task = tasks.find(task => task.id === id);
+            const response = await fetch(`${API_URL}/api/tasks/state/${id}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ ...tarea, completada: !tarea.completada }),
+                body: JSON.stringify({ ...task, completed: !task.completed }),
             });
 
             if (response.ok) {
-                setTasks(tasks.map(tarea =>
-                    tarea.id === id ? { ...tarea, completada: !tarea.completada } : tarea
+                setTasks(tasks.map(task =>
+                    task.id === id ? { ...task, completed: !task.completed } : task
                 ));
             } else {
                 console.error('Error al actualizar tarea:', response.statusText);
@@ -60,7 +74,7 @@ const Tareas = () => {
 
     const eliminarTarea = async (id) => {
         try {
-            const response = await fetch(`${API_URL}/tareas/${id}`, {
+            const response = await fetch(`${API_URL}/api/tasks/${id}`, {
                 method: 'DELETE',
             });
 
@@ -131,7 +145,7 @@ const Tareas = () => {
                                 key={tarea.id}
                                 className={`
                   flex items-center p-4 rounded-lg 
-                  ${tarea.completada
+                  ${tarea.completed
                                         ? 'bg-green-900/30 border border-green-700/50'
                                         : 'bg-gray-800 border border-gray-700'}
                 `}
@@ -140,7 +154,7 @@ const Tareas = () => {
                                     className="mr-4 cursor-pointer"
                                     onClick={() => toggleCompletada(tarea.id)}
                                 >
-                                    {tarea.completada ? (
+                                    {tarea.completed ? (
                                         <CheckCircle2 className="text-green-500" size={24} />
                                     ) : (
                                         <Circle className="text-gray-500" size={24} />
@@ -149,14 +163,16 @@ const Tareas = () => {
 
                                 <div className="flex-grow">
                                     <h3
-                                        className={`text-lg font-semibold ${tarea.completada ? 'line-through text-gray-500' : ''
+                                        className={`text-lg font-semibold ${tarea.completed ? 'line-through text-gray-500' : ''
                                             }`}
                                     >
                                         {tarea.title}
                                     </h3>
                                     <p className="text-sm text-gray-400">{tarea.description}</p>
                                     <span className="text-xs text-gray-500 mt-1">
-                                        Creada el: {tarea.creation_date}
+                                        {/*Creada el: {tarea.creation_date}*/}
+                                        Creada el: {new Date(tarea.creation_date).toLocaleDateString()}
+
                                     </span>
                                 </div>
 

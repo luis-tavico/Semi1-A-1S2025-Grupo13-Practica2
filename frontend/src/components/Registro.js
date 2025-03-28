@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Camera, User, Mail, Lock, KeyRound } from 'lucide-react';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Registro = () => {
 	const [profilePicture, setProfilePicture] = useState(null);
@@ -12,17 +14,27 @@ const Registro = () => {
 	const API_URL = process.env.REACT_APP_API_URL;
 
 	const handleImageUpload = (e) => {
-        const file = e.target.files[0];
-        if (file) {
-            setProfilePicture(file);
-        }
-    };
+		const file = e.target.files[0];
+		if (file) {
+			setProfilePicture(file);
+		}
+	};
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 
 		if (password !== confirmPassword) {
-			alert("Las contraseñas no coinciden.");
+			toast.warning('¡Las contraseñas no coinciden!', {
+				position: "top-right",
+				autoClose: 1000,
+				hideProgressBar: true,
+				closeOnClick: false,
+				pauseOnHover: true,
+				draggable: true,
+				progress: undefined,
+				theme: "colored",
+				transition: Bounce,
+			});
 			return;
 		}
 
@@ -33,21 +45,54 @@ const Registro = () => {
 			formData.append('email', email);
 			formData.append('password', password);
 
-			const response = await fetch(`${API_URL}/registrarse`, {
+			const response = await fetch(`${API_URL}/api/users/register`, {
 				method: 'POST',
 				body: formData,
 			});
 
 			if (response.ok) {
-				alert('Registro exitoso!');
-				navigate('/login');
+				toast.success('¡Registro exitoso!', {
+					position: "top-right",
+					autoClose: 1000,
+					hideProgressBar: true,
+					closeOnClick: false,
+					pauseOnHover: true,
+					draggable: true,
+					progress: undefined,
+					theme: "colored",
+					transition: Bounce,
+				});
+				setTimeout(() => {
+					navigate('/login');
+				}, 1000);
 			} else {
-				const errorData = await response.json();
-				alert(`Error al registrarse: ${errorData.message || 'Error desconocido'}`);
+				//const errorData = await response.json();
+				//alert(`Error al registrarse: ${errorData.message || 'Error desconocido'}`);
+				toast.error('¡Error al registrarse!', {
+					position: "top-right",
+					autoClose: 1000,
+					hideProgressBar: true,
+					closeOnClick: false,
+					pauseOnHover: true,
+					draggable: true,
+					progress: undefined,
+					theme: "colored",
+					transition: Bounce,
+				});
 			}
 		} catch (error) {
-			console.error('Error al registrarse:', error);
-			alert('Error al registrarse. Inténtalo de nuevo.');
+			//console.error('Error al registrarse:', error);
+			toast.error('¡Error al registrarse!', {
+				position: "top-right",
+				autoClose: 1000,
+				hideProgressBar: true,
+				closeOnClick: false,
+				pauseOnHover: true,
+				draggable: true,
+				progress: undefined,
+				theme: "colored",
+				transition: Bounce,
+			});
 		}
 	};
 
@@ -150,6 +195,7 @@ const Registro = () => {
 					</p>
 				</div>
 			</div>
+			<ToastContainer />
 		</div>
 	);
 };

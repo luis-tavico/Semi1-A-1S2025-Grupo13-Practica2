@@ -10,11 +10,12 @@ const Tarea = () => {
     const [creationDate, setCreationDate] = useState(new Date().toISOString().split('T')[0]);
     const [menuAbierto, setMenuAbierto] = useState(false);
     const navigate = useNavigate();
+    const token = localStorage.getItem('token');
     const API_URL = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
         if (id) {
-            fetch(`${API_URL}/tareas/${id}`)
+            fetch(`${API_URL}/api/tasks/${id}`)
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('No se pudo cargar la tarea.');
@@ -44,16 +45,17 @@ const Tarea = () => {
         const tareaData = {
             title: title,
             description,
-            creation_date,
+            creation_date: creationDate,
         };
 
         const method = id ? 'PUT' : 'POST';
-        const url = id ? `${API_URL}/tareas/${id}` : `${API_URL}/tareas`;
+        const url = id ? `${API_URL}/api/tasks/${id}` : `${API_URL}/api/tasks/`;
 
         fetch(url, {
             method: method,
             headers: {
                 'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
             },
             body: JSON.stringify(tareaData),
         })

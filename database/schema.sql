@@ -1,5 +1,5 @@
-CREATE DATABASE taskflow_clouddrive;
-\c taskflow_clouddrive;
+--CREATE DATABASE taskflow_clouddrive;
+--\c taskflow_clouddrive;
 
 -- Tabla de usuarios
 CREATE TABLE users (

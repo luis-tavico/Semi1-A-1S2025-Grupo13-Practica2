@@ -1,77 +1,119 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { List, Folder, Eye, Trash2, LogOut, Plus, FileText, Image, File } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { List, Folder, Trash2, LogOut, Eye, Upload, FileText, FileImage, File } from 'lucide-react';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Archivos = () => {
     const [menuAbierto, setMenuAbierto] = useState(false);
-    const [archivos, setArchivos] = useState([]);
-    const fileInputRef = useRef(null);
+    const [files, setFiles] = useState([]);
+    const [profilePicture, setProfilePicture] = useState('');
     const navigate = useNavigate();
+    const token = localStorage.getItem('token');
     const API_URL = process.env.REACT_APP_API_URL;
 
-    const cargarArchivos = useCallback(async () => {
-        try {
-            const response = await axios.get(`${API_URL}/archivos`);
-            const archivosConDetalles = response.data.map(nombre => ({
-                id: Date.now() + Math.random(),
-                nombre: nombre,
-                tipo: nombre.split('.').pop(),
-                fechaCarga: new Date().toISOString().split('T')[0]
-            }));
-            setArchivos(archivosConDetalles);
-        } catch (error) {
-            console.error('Error al cargar archivos:', error);
-            alert('No se pudieron cargar los archivos');
-        }
-    }, [API_URL]);
-
     useEffect(() => {
-        cargarArchivos();
-    }, [cargarArchivos]);
-
-    const handleFileUpload = async (event) => {
-        const files = Array.from(event.target.files);
-        
-        for (let file of files) {
-            const formData = new FormData();
-            formData.append('file', file);
-
+        const fetchArchivos = async () => {
             try {
-                const _ = await axios.post(`${API_URL}/archivos`, formData, {
+                const response = await fetch(`${API_URL}/api/files/`, {
                     headers: {
-                        'Content-Type': 'multipart/form-data'
+                        'Authorization': `Bearer ${token}`
                     }
                 });
-                cargarArchivos();
+                if (response.ok) {
+                    const data = await response.json();
+                    setFiles(data.files);
+                    setProfilePicture(data.user.profile_picture);
+                } else {
+                    console.error('Error al obtener archivos:', response.statusText);
+                    alert('Error al obtener archivos. Inténtalo de nuevo.');
+                }
             } catch (error) {
-                console.error('Error al subir archivo:', error);
-                alert(`No se pudo subir el archivo ${file.name}`);
+                console.error('Error al obtener archivos:', error);
+                alert('Error al obtener archivos. Inténtalo de nuevo.');
             }
+        };
+
+        fetchArchivos();
+    }, [API_URL, token]);
+
+    const handleFileUpload = async (event) => {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch(`${API_URL}/api/files/upload/`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                body: formData
+            });
+
+            if (response.ok) {
+                const newFile = await response.json();
+                setFiles([newFile, ...files]);
+                toast.success('¡Archivo subido exitosamente!', {
+                    position: "top-right",
+                    autoClose: 1000,
+                    hideProgressBar: true,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "colored",
+                    transition: Bounce,
+                });
+            } else {
+                const errorData = await response.json();
+                console.error('Error al subir archivo:', errorData);
+                alert(errorData.error || 'Error al subir archivo. Inténtalo de nuevo.');
+            }
+        } catch (error) {
+            console.error('Error al subir archivo:', error);
+            alert('Error al subir archivo. Inténtalo de nuevo.');
         }
     };
 
-    const eliminarArchivo = async (nombre) => {
+    const eliminarArchivo = async (id) => {
         try {
-            await axios.delete(`${API_URL}/archivos/${nombre}`);
-            setArchivos(archivos.filter(archivo => archivo.nombre !== nombre));
+            const response = await fetch(`${API_URL}/api/files/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                setFiles(files.filter(file => file.id !== id));
+                toast.success('¡Archivo eliminado exitosamente!', {
+                    position: "top-right",
+                    autoClose: 1000,
+                    hideProgressBar: true,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "colored",
+                    transition: Bounce,
+                });
+            } else {
+                console.error('Error al eliminar archivo:', response.statusText);
+                alert('Error al eliminar archivo. Inténtalo de nuevo.');
+            }
         } catch (error) {
             console.error('Error al eliminar archivo:', error);
-            alert('No se pudo eliminar el archivo');
+            alert('Error al eliminar archivo. Inténtalo de nuevo.');
         }
     };
 
-    const visualizarArchivo = (archivo) => {
-        console.log(`Visualizando archivo: ${archivo.nombre}`);
-    };
-
-    const getFileDetails = (tipo) => {
-        const tipoLower = tipo.toLowerCase();
-        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(tipoLower)) 
-            return { icon: <Image className="text-blue-500" />, color: 'blue' };
-        if (['txt', 'doc', 'docx', 'pdf'].includes(tipoLower)) 
-            return { icon: <FileText className="text-green-500" />, color: 'green' };
-        return { icon: <File className="text-gray-500" />, color: 'gray' };
+    const getFileIcon = (fileType) => {
+        if (fileType.includes('image')) return <FileImage size={24} />;
+        if (fileType.includes('text') || fileType.includes('doc')) return <FileText size={24} />;
+        return <File size={24} />;
     };
 
     return (
@@ -95,12 +137,9 @@ const Archivos = () => {
                 {/* Menú de salida */}
                 <div className="absolute top-4 right-4 flex items-center space-x-4">
                     <div className="relative">
-                        <div
-                            className="w-10 h-10 rounded-full border-2 border-gray-600 overflow-hidden cursor-pointer"
-                            onClick={() => setMenuAbierto(!menuAbierto)}
-                        >
+                        <div className="w-10 h-10 rounded-full border-2 border-gray-600 overflow-hidden cursor-pointer" onClick={() => setMenuAbierto(!menuAbierto)}>
                             <img
-                                src="/api/placeholder/40/40"
+                                src={profilePicture || "/unknown.png"}
                                 alt="Usuario"
                                 className="w-full h-full object-cover"
                             />
@@ -115,78 +154,88 @@ const Archivos = () => {
                     </div>
                 </div>
 
-                {/* Gestión de Archivos */}
+                {/* Lista de Archivos */}
                 <div>
-                    <h1 className="text-3xl font-bold mb-4">Mis Archivos</h1>
+                    <h1 className="text-3xl font-bold mb-6">Mis Archivos</h1>
 
-                    {/* Botón de carga de archivos */}
-                    <div className="mb-6 flex items-center space-x-4">
-                        <input 
-                            type="file" 
-                            ref={fileInputRef}
-                            onChange={handleFileUpload}
+                    {/* Boton de subida*/}
+                    <div className="mb-8 flex">
+                        <input
+                            type="file"
+                            id="file-upload"
                             className="hidden"
-                            multiple
+                            onChange={handleFileUpload}
                         />
-                        <button
-                            onClick={() => fileInputRef.current.click()}
-                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center"
+                        <label
+                            htmlFor="file-upload"
+                            className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-300 flex items-center cursor-pointer shadow-lg w-48"
                         >
-                            <Plus className="mr-2" size={20} />
-                            Cargar Archivos
-                        </button>
+                            <Upload className="mr-2" size={18} />
+                            Subir Archivo
+                        </label>
                     </div>
 
-                    {/* Lista de Archivos */}
-                    <div className="space-y-4">
-                        {archivos.map((archivo) => {
-                            const { icon, color } = getFileDetails(archivo.tipo);
-                            return (
-                                <div 
-                                    key={archivo.id}
-                                    className="bg-gray-800 p-4 rounded-lg border border-gray-700 flex items-center justify-between hover:bg-gray-700 transition"
+                    {/* Grid de archivos */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {files.length === 0 ? (
+                            <div className="col-span-3 text-center py-10 bg-gray-800 rounded-lg">
+                                <Folder size={64} className="mx-auto text-gray-600 mb-4" />
+                                <p className="text-gray-400">No tienes archivos todavía.</p>
+                            </div>
+                        ) : (
+                            files.map((file) => (
+                                <div
+                                    key={file.id}
+                                    className="bg-gray-800 border border-gray-700 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:border-blue-500 group"
                                 >
-                                    <div className="flex items-center space-x-4 flex-grow">
-                                        {icon}
-                                        <div className="flex-grow">
-                                            <div className="flex items-center">
-                                                <h3 className="text-md font-semibold mr-2 truncate max-w-[300px]">
-                                                    {archivo.nombre}
-                                                </h3>
-                                                <span 
-                                                    className={`px-2 py-1 rounded text-xs bg-${color}-500/20 text-${color}-400`}
-                                                >
-                                                    {archivo.tipo}
-                                                </span>
-                                            </div>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                Cargado el {archivo.fechaCarga}
-                                            </p>
+                                    <div className="p-5 bg-gray-750 border-b border-gray-700 flex items-center">
+                                        <div className="text-blue-400 mr-3">
+                                            {getFileIcon(file.file_type)}
+                                        </div>
+                                        <div className="flex-grow truncate">
+                                            <h3 className="font-semibold truncate group-hover:text-blue-400 transition-colors">
+                                                {file.file_name}
+                                            </h3>
                                         </div>
                                     </div>
 
-                                    <div className="flex items-center space-x-3">
-                                        <button
-                                            onClick={() => visualizarArchivo(archivo)}
-                                            className="text-blue-500 hover:text-blue-400 transition"
+                                    <div className="px-5 py-3 text-xs text-gray-400">
+                                        <div className="flex justify-between">
+                                            <span>Tipo: {file.file_type?.split('/')[1] || 'Desconocido'}</span>
+                                            <span>Subido: {new Date(file.upload_date).toLocaleDateString()}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex border-t border-gray-700">
+                                        <a
+                                            href={file.file_url}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="flex-1 py-3 text-blue-400 hover:bg-gray-700 transition-colors flex items-center justify-center"
                                             title="Ver archivo"
                                         >
-                                            <Eye size={20} />
-                                        </button>
+                                            <Eye size={18} className="mr-1" />
+                                            <span>Ver</span>
+                                        </a>
+
+                                        <div className="w-px bg-gray-700"></div>
+
                                         <button
-                                            onClick={() => eliminarArchivo(archivo.nombre)}
-                                            className="text-red-500 hover:text-red-400 transition"
+                                            onClick={() => eliminarArchivo(file.id)}
+                                            className="flex-1 py-3 text-red-400 hover:bg-gray-700 transition-colors flex items-center justify-center cursor-pointer"
                                             title="Eliminar archivo"
                                         >
-                                            <Trash2 size={20} />
+                                            <Trash2 size={18} className="mr-1" />
+                                            <span>Eliminar</span>
                                         </button>
                                     </div>
                                 </div>
-                            );
-                        })}
+                            ))
+                        )}
                     </div>
                 </div>
             </div>
+            <ToastContainer />
         </div>
     );
 };

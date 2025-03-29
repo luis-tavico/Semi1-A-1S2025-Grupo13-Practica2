@@ -66,9 +66,9 @@ const Registro = () => {
 					navigate('/login');
 				}, 1000);
 			} else {
-				//const errorData = await response.json();
+				const errorData = await response.json();
 				//alert(`Error al registrarse: ${errorData.message || 'Error desconocido'}`);
-				toast.error('¡Error al registrarse!', {
+				toast.error(errorData.message, {
 					position: "top-right",
 					autoClose: 1000,
 					hideProgressBar: true,

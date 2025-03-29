@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { List, Folder, X, Save, CalendarDays } from 'lucide-react';
 
 const Tarea = () => {
+    const location = useLocation();
+    const profilePicture = location.state?.profilePicture;
     const { id } = useParams();
     const [tarea, setTarea] = useState(null);
     const [title, setTitle] = useState('');
@@ -15,7 +17,12 @@ const Tarea = () => {
 
     useEffect(() => {
         if (id) {
-            fetch(`${API_URL}/api/tasks/${id}`)
+            fetch(`${API_URL}/api/tasks/${id}`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
+            })
                 .then(response => {
                     if (!response.ok) {
                         throw new Error('No se pudo cargar la tarea.');
@@ -26,7 +33,7 @@ const Tarea = () => {
                     setTarea(data);
                     setTitle(data.title);
                     setDescription(data.description);
-                    setCreationDate(data.creation_date);
+                    setCreationDate(new Date(data.creation_date).toISOString().split('T')[0]);
                 })
                 .catch(error => {
                     console.error('Error al cargar la tarea:', error);
@@ -37,7 +44,7 @@ const Tarea = () => {
             setDescription('');
             setCreationDate(new Date().toISOString().split('T')[0]);
         }
-    }, [id, API_URL]);
+    }, [id, API_URL, token]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -99,7 +106,7 @@ const Tarea = () => {
                             onClick={() => setMenuAbierto(!menuAbierto)}
                         >
                             <img
-                                src="/api/placeholder/40/40"
+                                src={ profilePicture || 'unknown.png' }
                                 alt="Usuario"
                                 className="w-full h-full object-cover"
                             />
@@ -171,7 +178,7 @@ const Tarea = () => {
                             <button
                                 type="button"
                                 onClick={() => navigate('/tareas')}
-                                className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition flex items-center"
+                                className="bg-gray-700 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition flex items-center cursor-pointer"
                             >
                                 <X className="mr-2" size={20} />
                                 Cancelar
@@ -179,7 +186,7 @@ const Tarea = () => {
 
                             <button
                                 type="submit"
-                                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center"
+                                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center cursor-pointer"
                             >
                                 <Save className="mr-2" size={20} />
                                 {tarea ? 'Guardar Cambios' : 'Crear Tarea'}

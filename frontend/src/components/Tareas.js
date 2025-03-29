@@ -1,24 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { List, Folder, Trash2, LogOut, Circle, CheckCircle2, Plus, Edit } from 'lucide-react';
+import { ToastContainer, toast, Bounce } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Tareas = () => {
     const [menuAbierto, setMenuAbierto] = useState(false);
     const [tasks, setTasks] = useState([]);
+    const [profilePicture, setProfilePicture] = useState('');
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
     const API_URL = process.env.REACT_APP_API_URL;
 
     useEffect(() => {
         const fetchTareas = async () => {
-            {/*
-            if (!token) {
-                console.error('Token no encontrado.');
-                alert('Usuario no autenticado. Inicia sesión nuevamente.');
-                navigate('/login');
-                return;
-            }
-            */}
             try {
                 const response = await fetch(`${API_URL}/api/tasks/`, {
                     headers: {
@@ -27,7 +22,11 @@ const Tareas = () => {
                 });
                 if (response.ok) {
                     const data = await response.json();
-                    setTasks(data);
+                    const sortedTasks = data.tasks.sort((a, b) => {
+                        return new Date(b.creation_date) - new Date(a.creation_date);
+                    });
+                    setTasks(sortedTasks);
+                    setProfilePicture(data.user.profile_picture);
                 } else {
                     console.error('Error al obtener tareas:', response.statusText);
                     alert('Error al obtener tareas. Inténtalo de nuevo.');
@@ -39,7 +38,7 @@ const Tareas = () => {
         };
 
         fetchTareas();
-    }, [API_URL, navigate]);
+    }, [API_URL, navigate, token]);
 
     const toggleCompletada = async (id) => {
         try {
@@ -76,9 +75,25 @@ const Tareas = () => {
         try {
             const response = await fetch(`${API_URL}/api/tasks/${id}`, {
                 method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                }
             });
 
             if (response.ok) {
+                const data = await response.json();
+                toast.success(data.message, {
+                    position: "top-right",
+                    autoClose: 1000,
+                    hideProgressBar: true,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "colored",
+                    transition: Bounce,
+                });
                 setTasks(tasks.filter(tarea => tarea.id !== id));
             } else {
                 console.error('Error al eliminar tarea:', response.statusText);
@@ -113,7 +128,7 @@ const Tareas = () => {
                     <div className="relative">
                         <div className="w-10 h-10 rounded-full border-2 border-gray-600 overflow-hidden cursor-pointer" onClick={() => setMenuAbierto(!menuAbierto)}>
                             <img
-                                src="/images.jpeg"
+                                src={profilePicture || "/unknown.png"}
                                 alt="Usuario"
                                 className="w-full h-full object-cover"
                             />
@@ -133,70 +148,70 @@ const Tareas = () => {
                     <h1 className="text-3xl font-bold mb-4">Mis Tareas</h1>
 
                     <div className="mb-6">
-                        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center" onClick={() => navigate('/creartarea')}>
+                        {/*<button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center" onClick={() => navigate('/creartarea')}>*/}
+                        <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition flex items-center cursor-pointer" onClick={() => navigate('/creartarea', { state: { profilePicture } })}>
                             <Plus className="mr-2" size={20} />
                             Crear Nueva Tarea
                         </button>
                     </div>
 
                     <div className="space-y-4">
-                        {tasks.map((tarea) => (
-                            <div
-                                key={tarea.id}
-                                className={`
-                  flex items-center p-4 rounded-lg 
-                  ${tarea.completed
-                                        ? 'bg-green-900/30 border border-green-700/50'
-                                        : 'bg-gray-800 border border-gray-700'}
-                `}
-                            >
-                                <div
-                                    className="mr-4 cursor-pointer"
-                                    onClick={() => toggleCompletada(tarea.id)}
-                                >
-                                    {tarea.completed ? (
-                                        <CheckCircle2 className="text-green-500" size={24} />
-                                    ) : (
-                                        <Circle className="text-gray-500" size={24} />
-                                    )}
-                                </div>
-
-                                <div className="flex-grow">
-                                    <h3
-                                        className={`text-lg font-semibold ${tarea.completed ? 'line-through text-gray-500' : ''
-                                            }`}
-                                    >
-                                        {tarea.title}
-                                    </h3>
-                                    <p className="text-sm text-gray-400">{tarea.description}</p>
-                                    <span className="text-xs text-gray-500 mt-1">
-                                        {/*Creada el: {tarea.creation_date}*/}
-                                        Creada el: {new Date(tarea.creation_date).toLocaleDateString()}
-
-                                    </span>
-                                </div>
-
-                                <div className="flex items-center space-x-2">
-                                    {/* Botón Editar Tarea */}
-                                    <button
-                                        onClick={() => handleEditarTarea(tarea)}
-                                        className="text-blue-500 hover:text-blue-400 mr-2"
-                                    >
-                                        <Edit size={20} />
-                                    </button>
-
-                                    <button
-                                        onClick={() => eliminarTarea(tarea.id)}
-                                        className="text-red-500 hover:text-red-400"
-                                    >
-                                        <Trash2 size={20} />
-                                    </button>
-                                </div>
+                        {tasks.length === 0 ? (
+                            <div className="text-center py-10 bg-gray-800 rounded-lg">
+                                <List size={64} className="mx-auto text-gray-600 mb-4" />
+                                <p className="text-gray-400">No tienes tareas pendientes.</p>
                             </div>
-                        ))}
+                        ) : (
+                            tasks.map((tarea) => (
+                                <div
+                                    key={tarea.id}
+                                    className={`flex items-center p-4 rounded-lg ${tarea.completed ? 'bg-green-900/30 border border-green-700/50' : 'bg-gray-800 border border-gray-700'}`}>
+                                    <div
+                                        className="mr-4 cursor-pointer"
+                                        onClick={() => toggleCompletada(tarea.id)}
+                                    >
+                                        {tarea.completed ? (
+                                            <CheckCircle2 className="text-green-500" size={24} />
+                                        ) : (
+                                            <Circle className="text-gray-500" size={24} />
+                                        )}
+                                    </div>
+
+                                    <div className="flex-grow">
+                                        <h3
+                                            className={`text-lg font-semibold ${tarea.completed ? 'line-through text-gray-500' : ''}`}
+                                        >
+                                            {tarea.title}
+                                        </h3>
+                                        <p className="text-sm text-gray-400">{tarea.description}</p>
+                                        <span className="text-xs text-gray-500 mt-1">
+                                            Creada el: {new Date(tarea.creation_date).toLocaleDateString()}
+                                        </span>
+                                    </div>
+
+                                    <div className="flex items-center space-x-2">
+                                        {/* Botón Editar Tarea */}
+                                        <button
+                                            onClick={() => handleEditarTarea(tarea)}
+                                            className="text-blue-500 hover:text-blue-400 mr-2 cursor-pointer"
+                                        >
+                                            <Edit size={20} />
+                                        </button>
+
+                                        <button
+                                            onClick={() => eliminarTarea(tarea.id)}
+                                            className="text-red-500 hover:text-red-400 cursor-pointer"
+                                        >
+                                            <Trash2 size={20} />
+                                        </button>
+                                    </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>
+            <ToastContainer />
         </div>
     );
 };

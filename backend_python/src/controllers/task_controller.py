@@ -9,10 +9,13 @@ from middleware.auth_middleware import auth_required
 def create_task():
     try:
         user_id = get_jwt_identity()
-        data = request.get_json()
+        # Cambio de JSON a FormData
+        title = request.form.get("title")
+        description = request.form.get("description")
+        
         new_task = Task(
-            title=data.get("title"),
-            description=data.get("description"),
+            title=title,
+            description=description,
             user_id=user_id
         )
         db.session.add(new_task)
@@ -21,6 +24,7 @@ def create_task():
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
+# Los métodos de obtención no necesitan cambios ya que no reciben datos
 @auth_required
 def get_tasks_by_user():
     try:
@@ -60,11 +64,11 @@ def update_task(task_id):
         if not task:
             return jsonify({"message": "Tarea no encontrada"}), 404
 
-        data = request.get_json()
-        if 'title' in data:
-            task.title = data.get("title")
-        if 'description' in data:
-            task.description = data.get("description")
+        # Cambio de JSON a FormData
+        if 'title' in request.form:
+            task.title = request.form.get("title")
+        if 'description' in request.form:
+            task.description = request.form.get("description")
 
         db.session.commit()
         return jsonify({"message": "Tarea actualizada exitosamente", "task": task.to_dict()}), 200
@@ -80,14 +84,20 @@ def update_state_task(task_id):
         if not task:
             return jsonify({"message": "Tarea no encontrada"}), 404
 
-        data = request.get_json()
-        task.completed = data.get("completed", not task.completed)
+        # Cambio de JSON a FormData
+        completed = request.form.get("completed")
+        if completed is not None:
+            # Convertir string a booleano
+            task.completed = completed.lower() == 'true'
+        else:
+            task.completed = not task.completed
 
         db.session.commit()
         return jsonify({"message": "Estado de tarea actualizado exitosamente", "task": task.to_dict()}), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
+# El método delete no necesita cambios ya que no recibe datos
 @auth_required
 def delete_task(task_id):
     try:

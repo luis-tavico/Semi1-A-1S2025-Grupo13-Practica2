@@ -5,13 +5,15 @@ from models.file_model import File
 from werkzeug.utils import secure_filename
 import os
 import uuid
+from middleware.auth_middleware import auth_required
 
-UPLOAD_FOLDER = 'uploads'
+UPLOAD_FOLDER = 'uploads/files'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'docx'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+@auth_required
 def upload_file():
     try:
         if 'file' not in request.files:
@@ -49,6 +51,8 @@ def upload_file():
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
+# Los métodos de obtención y eliminación no necesitan cambios
+@auth_required
 def get_files_by_user():
     try:
         user_id = get_jwt_identity()
@@ -57,6 +61,7 @@ def get_files_by_user():
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
+@auth_required
 def get_file_by_id(file_id):
     try:
         user_id = get_jwt_identity()
@@ -69,6 +74,7 @@ def get_file_by_id(file_id):
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
+@auth_required
 def delete_file(file_id):
     try:
         user_id = get_jwt_identity()

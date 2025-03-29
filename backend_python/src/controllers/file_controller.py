@@ -2,10 +2,11 @@ from flask import request, jsonify
 from flask_jwt_extended import get_jwt_identity
 from config.database import db
 from models.file_model import File
-from werkzeug.utils import secure_filename
 import os
+from werkzeug.utils import secure_filename
 import uuid
 from middleware.auth_middleware import auth_required
+
 
 UPLOAD_FOLDER = 'uploads/files'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'pdf', 'docx'}
@@ -49,17 +50,26 @@ def upload_file():
             "file": new_file.to_dict()
         }), 201
     except Exception as e:
+        print(f"Error uploading file: {str(e)}")
         return jsonify({"message": str(e)}), 500
 
-# Los métodos de obtención y eliminación no necesitan cambios
 @auth_required
 def get_files_by_user():
     try:
         user_id = get_jwt_identity()
         files = File.query.filter_by(user_id=user_id).all()
-        return jsonify([file.to_dict() for file in files]), 200
+        
+        # Always return an array, even if empty
+        files_list = [file.to_dict() for file in files] if files else []
+        
+        # Return in the format expected by the frontend
+        return jsonify({
+            "message": "Archivos obtenidos exitosamente",
+            "files": files_list
+        }), 200
     except Exception as e:
-        return jsonify({"message": str(e)}), 500
+        print(f"Error getting files: {str(e)}")
+        return jsonify({"message": str(e), "files": []}), 500
 
 @auth_required
 def get_file_by_id(file_id):
@@ -68,11 +78,12 @@ def get_file_by_id(file_id):
         file = File.query.filter_by(id=file_id, user_id=user_id).first()
         
         if not file:
-            return jsonify({"message": "Archivo no encontrado."}), 404
+            return jsonify({"message": "Archivo no encontrado.", "file": None}), 404
 
-        return jsonify(file.to_dict()), 200
+        return jsonify({"message": "Archivo encontrado", "file": file.to_dict()}), 200
     except Exception as e:
-        return jsonify({"message": str(e)}), 500
+        print(f"Error getting file by id: {str(e)}")
+        return jsonify({"message": str(e), "file": None}), 500
 
 @auth_required
 def delete_file(file_id):
@@ -92,4 +103,5 @@ def delete_file(file_id):
 
         return jsonify({"message": "Archivo eliminado exitosamente."}), 200
     except Exception as e:
+        print(f"Error deleting file: {str(e)}")
         return jsonify({"message": str(e)}), 500

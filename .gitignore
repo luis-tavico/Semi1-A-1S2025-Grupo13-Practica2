@@ -1,0 +1,13 @@
+
+backendFlask/venv/
+backend_python/venv/
+
+backend_python/src/controllers/__pycache__/
+
+backend_python/src/routes/__pycache__/
+
+backend_python/src/middleware/__pycache__/
+
+backend_python/src/models/__pycache__/
+
+backend_python/src/config/__pycache__/

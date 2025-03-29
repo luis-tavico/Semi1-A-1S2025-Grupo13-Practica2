@@ -24,10 +24,7 @@ def register():
                     os.makedirs(upload_folder)
                 
                 # Guardar archivo
-                filename = secure_filename(file.filename)
-                file_path = os.path.join(upload_folder, f"{uuid.uuid4()}_{filename}")
-                file.save(file_path)
-                profile_picture = file_path
+
         
         # Verificar si el usuario ya existe
         existing_user = User.query.filter_by(email=email).first()
@@ -52,10 +49,10 @@ def register():
 def login():
     try:
         # Cambio de JSON a FormData
-        email = request.form.get('email')
+        username = request.form.get('username')
         password = request.form.get('password')
         
-        user = User.query.filter_by(email=email).first()
+        user = User.query.filter_by(username=username).first()
         
         if not user or not user.check_password(password):
             return jsonify({"message": "Credenciales inválidas"}), 401
@@ -102,10 +99,7 @@ def update_profile():
                     os.makedirs(upload_folder)
                 
                 # Guardar archivo
-                filename = secure_filename(file.filename)
-                file_path = os.path.join(upload_folder, f"{uuid.uuid4()}_{filename}")
-                file.save(file_path)
-                user.profile_picture = file_path
+
         
         db.session.commit()
         

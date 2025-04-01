@@ -7,17 +7,25 @@ from middleware.auth_middleware import auth_required
 
 @auth_required
 def create_task():
+    print("create_task")
     try:
+        data = request.get_json() if request.is_json else request.form
+        title = data.get("title")
+        description = data.get("description")
+        creation_date = data.get("creation_date")
+        
         user_id = get_jwt_identity()
-        data = request.get_json()
+        
         new_task = Task(
-            title=data.get("title"),
-            description=data.get("description"),
-            user_id=user_id
+            title=title,
+            description=description,
+            user_id=user_id,
+            creation_date=creation_date
         )
         db.session.add(new_task)
         db.session.commit()
-        return jsonify({"message": "Tarea creada exitosamente", "task": new_task.to_dict()}), 201
+        
+        return jsonify({"message": "Tarea creada exitosamente."}), 201
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
@@ -41,8 +49,7 @@ def get_tasks_by_user():
 @auth_required
 def get_task_by_id(task_id):
     try:
-        user_id = get_jwt_identity()
-        task = Task.query.filter_by(id=task_id, user_id=user_id).first()
+        task = Task.query.get(task_id)
         
         if not task:
             return jsonify({"message": "Tarea no encontrada"}), 404
@@ -54,37 +61,51 @@ def get_task_by_id(task_id):
 @auth_required
 def update_task(task_id):
     try:
-        user_id = get_jwt_identity()
-        task = Task.query.filter_by(id=task_id, user_id=user_id).first()
+        data = request.get_json() if request.is_json else request.form
+        title = data.get("title")
+        description = data.get("description")
+        creation_date = data.get("creation_date")
+        
+        task = Task.query.get(task_id)
         
         if not task:
             return jsonify({"message": "Tarea no encontrada"}), 404
 
-        data = request.get_json()
-        if 'title' in data:
-            task.title = data.get("title")
-        if 'description' in data:
-            task.description = data.get("description")
+        if title:
+            task.title = title
+        if description:
+            task.description = description
+        if creation_date:
+            task.creation_date = creation_date
 
         db.session.commit()
-        return jsonify({"message": "Tarea actualizada exitosamente", "task": task.to_dict()}), 200
+        
+        return jsonify({"message": "Tarea actualizada exitosamente."}), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
 @auth_required
 def update_state_task(task_id):
     try:
-        user_id = get_jwt_identity()
-        task = Task.query.filter_by(id=task_id, user_id=user_id).first()
+        data = request.get_json() if request.is_json else request.form
+        completed = data.get("completed")
+        
+        task = Task.query.get(task_id)
         
         if not task:
             return jsonify({"message": "Tarea no encontrada"}), 404
 
-        data = request.get_json()
-        task.completed = data.get("completed", not task.completed)
+        # Handle different types of input for completed
+        if isinstance(completed, str):
+            task.completed = completed.lower() == 'true'
+        elif completed is not None:
+            task.completed = bool(completed)
+        else:
+            task.completed = not task.completed
 
         db.session.commit()
-        return jsonify({"message": "Estado de tarea actualizado exitosamente", "task": task.to_dict()}), 200
+        
+        return jsonify({"message": "Tarea actualizada exitosamente."}), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
@@ -99,6 +120,7 @@ def delete_task(task_id):
 
         db.session.delete(task)
         db.session.commit()
-        return jsonify({"message": "Tarea eliminada exitosamente"}), 200
+        
+        return jsonify({"message": "Tarea eliminada exitosamente."}), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 500

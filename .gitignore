@@ -7,3 +7,15 @@ backend_python/src/middleware/__pycache__/
 backend_python/src/models/__pycache__/
 backend_python/src/config/__pycache__/
 backend_python\src\uploads
+
+
+backend_python/venv/
+/node_modules/
+frontend/node_modules/.bin/
+frontend/node_modules/.cache/babel-loader/
+frontend/node_modules/
+backend_python/src/config/__pycache__/
+backend_python/src/controllers/__pycache__/
+backend_python/src/middleware/__pycache__/
+backend_python/src/models/__pycache__/
+backend_python/src/routes/__pycache__/

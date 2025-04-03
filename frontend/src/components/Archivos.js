@@ -116,6 +116,10 @@ const Archivos = () => {
         return <File size={24} />;
     };
 
+    const handleViewFile = (file) => {
+        window.open(file.file_url, '_blank');
+    }
+
     return (
         <div className="flex h-screen bg-gray-900 text-white">
             {/* Sidebar */}
@@ -207,16 +211,14 @@ const Archivos = () => {
                                     </div>
 
                                     <div className="flex border-t border-gray-700">
-                                        <a
-                                            href={file.file_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
+                                        <button
+                                            onClick={() => handleViewFile(file)}
                                             className="flex-1 py-3 text-blue-400 hover:bg-gray-700 transition-colors flex items-center justify-center"
                                             title="Ver archivo"
                                         >
                                             <Eye size={18} className="mr-1" />
                                             <span>Ver</span>
-                                        </a>
+                                        </button>
 
                                         <div className="w-px bg-gray-700"></div>
 

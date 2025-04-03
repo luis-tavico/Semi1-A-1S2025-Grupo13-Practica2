@@ -2,28 +2,24 @@ const File = require('../models/fileModel');
 const User = require('../models/userModel');
 const path = require('path');
 
-
 exports.uploadFile = async (req, res) => {
     try {
         if (!req.file) {
             return res.status(400).json({ message: 'No se ha subido ningún archivo.' });
         }
-
-        const { filename, mimetype, path: filePath } = req.file;
+        
+        const { key, mimetype, location } = req.file;
         const user_id = req.user.id;
-        const user = await User.findOne({ where: { id: user_id } });
-
-        if (!user) {
-            return res.status(404).json({ message: 'Usuario no encontrado.' });
-        }
-
+        
+        const originalName = key.split('/').pop().split('_').slice(1).join('_');
+        
         const newFile = await File.create({
-            file_name: filename,
+            file_name: originalName,
             file_type: mimetype,
-            file_url: filePath,
+            file_url: location,
             user_id: user_id,
         });
-
+        
         res.status(201).json(newFile);
     } catch (error) {
         res.status(500).json({ message: error.message });

@@ -4,22 +4,20 @@ const path = require('path');
 
 exports.uploadFile = async (req, res) => {
     try {
-        if (!req.file) {
-            return res.status(400).json({ message: 'No se ha subido ningún archivo.' });
-        }
-        
-        const { key, mimetype, location } = req.file;
+        const { file_name, file_type, file_url } = req.body;
         const user_id = req.user.id;
-        
-        const originalName = key.split('/').pop().split('_').slice(1).join('_');
-        
+
+        if (!file_name || !file_url) {
+            return res.status(400).json({ message: 'Datos incompletos' });
+        }
+
         const newFile = await File.create({
-            file_name: originalName,
-            file_type: mimetype,
-            file_url: location,
-            user_id: user_id,
+            file_name,
+            file_type,
+            file_url,
+            user_id,
         });
-        
+
         res.status(201).json(newFile);
     } catch (error) {
         res.status(500).json({ message: error.message });

@@ -20,33 +20,16 @@ const upload = multer({
     storage: multerS3({
         s3: s3,
         bucket: process.env.S3_BUCKET,
-        contentType: multerS3.AUTO_CONTENT_TYPE,
-        metadata: (req, file, cb) => {
-            cb(null, { 
-                fieldName: file.fieldname,
-                'Content-Disposition': 'inline' 
-            });
-        },
         key: (req, file, cb) => {
             let folder = 'otros';
-            
-            if (file.mimetype.startsWith('image/')) {
-                folder = 'imagenes';
-            } else if (
-                file.mimetype.includes('pdf') ||
-                file.mimetype.includes('msword') ||
-                file.mimetype.includes('officedocument') ||
-                file.mimetype.includes('text/')
-            ) {
-                folder = 'documentos';
-            }
-            
+            if (file.mimetype.startsWith('image/')) folder = 'imagenes';
+            else if (file.mimetype.includes('pdf') || file.mimetype.includes('text/')) folder = 'documentos';
             cb(null, `${folder}/${Date.now()}_${file.originalname}`);
         },
     }),
 });
 
-router.post('/upload', authMiddleware, upload.single('file'), fileController.uploadFile);
+router.post('/upload', authMiddleware, fileController.uploadFile);
 router.get('/', authMiddleware, fileController.getFilesByUser);
 router.get('/:id', authMiddleware, fileController.getFileById);
 router.delete('/:id', authMiddleware, fileController.deleteFile);

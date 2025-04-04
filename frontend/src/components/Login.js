@@ -27,6 +27,7 @@ const Login = () => {
 
 			if (response.ok) {
 				localStorage.setItem("token", data.token);
+				localStorage.setItem('isAuthenticated', 'true');
 				navigate('/tareas');
 			} else {
 				const errorData = await response.json();

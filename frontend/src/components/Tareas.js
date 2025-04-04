@@ -105,6 +105,11 @@ const Tareas = () => {
         }
     };
 
+    const logout = () => {
+        localStorage.removeItem('isAuthenticated');
+        navigate('/login');
+    };
+
     return (
         <div className="flex h-screen bg-gray-900 text-white">
             {/* Sidebar */}
@@ -135,7 +140,10 @@ const Tareas = () => {
                         </div>
                         {menuAbierto && (
                             <div className="absolute right-0 top-full mt-2 w-48 bg-gray-700 rounded-md shadow-lg z-10">
-                                <div className="px-4 py-2 hover:bg-gray-600 flex items-center cursor-pointer text-red-400" onClick={() => navigate('/login')}>
+                                <div
+                                    className="px-4 py-2 hover:bg-gray-600 flex items-center cursor-pointer text-red-400"
+                                    onClick={logout}
+                                >
                                     <LogOut className="mr-2" size={16} /> Cerrar sesión
                                 </div>
                             </div>

@@ -5,6 +5,7 @@ import Registro from './components/Registro';
 import Tarea from './components/Tarea';
 import Tareas from './components/Tareas';
 import Archivos from './components/Archivos';
+import RutaPrivada from './components/RutaPrivada'; // Asegúrate de crear este archivo
 
 function App() {
 	return (
@@ -14,10 +15,10 @@ function App() {
 					<Route path="/" element={<Navigate replace to="/login" />} />
 					<Route path="/login" element={<Login />} />
 					<Route path="/registro" element={<Registro />} />
-					<Route path="/creartarea" element={<Tarea />} />
-					<Route path="/editartarea/:id" element={<Tarea />} />
-					<Route path="/tareas" element={<Tareas />} />
-					<Route path="/archivos" element={<Archivos />} />
+					<Route path="/creartarea" element={<RutaPrivada><Tarea /></RutaPrivada>}/>
+					<Route path="/editartarea/:id" element={<RutaPrivada><Tarea /></RutaPrivada>}/>
+					<Route path="/tareas" element={<RutaPrivada><Tareas /></RutaPrivada>}/>
+					<Route path="/archivos"element={<RutaPrivada><Archivos /></RutaPrivada>}/>
 				</Routes>
 			</div>
 		</Router>

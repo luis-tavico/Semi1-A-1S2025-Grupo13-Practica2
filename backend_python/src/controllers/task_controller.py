@@ -7,9 +7,12 @@ from middleware.auth_middleware import auth_required
 
 @auth_required
 def create_task():
-    print("create_task")
     try:
-        data = request.get_json() if request.is_json else request.form
+        # Only use JSON data
+        data = request.get_json()
+        if not data:
+            return jsonify({"message": "No se proporcionaron datos"}), 400
+            
         title = data.get("title")
         description = data.get("description")
         creation_date = data.get("creation_date")
@@ -25,7 +28,7 @@ def create_task():
         db.session.add(new_task)
         db.session.commit()
         
-        return jsonify({"message": "Tarea creada exitosamente."}), 201
+        return jsonify({"message": "Tarea creada exitosamente.", "task": new_task.to_dict()}), 201
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
@@ -61,7 +64,11 @@ def get_task_by_id(task_id):
 @auth_required
 def update_task(task_id):
     try:
-        data = request.get_json() if request.is_json else request.form
+        # Only use JSON data
+        data = request.get_json()
+        if not data:
+            return jsonify({"message": "No se proporcionaron datos"}), 400
+            
         title = data.get("title")
         description = data.get("description")
         creation_date = data.get("creation_date")
@@ -80,14 +87,18 @@ def update_task(task_id):
 
         db.session.commit()
         
-        return jsonify({"message": "Tarea actualizada exitosamente."}), 200
+        return jsonify({"message": "Tarea actualizada exitosamente.", "task": task.to_dict()}), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 
 @auth_required
 def update_state_task(task_id):
     try:
-        data = request.get_json() if request.is_json else request.form
+        # Only use JSON data
+        data = request.get_json()
+        if not data:
+            return jsonify({"message": "No se proporcionaron datos"}), 400
+            
         completed = data.get("completed")
         
         task = Task.query.get(task_id)
@@ -105,7 +116,7 @@ def update_state_task(task_id):
 
         db.session.commit()
         
-        return jsonify({"message": "Tarea actualizada exitosamente."}), 200
+        return jsonify({"message": "Tarea actualizada exitosamente.", "task": task.to_dict()}), 200
     except Exception as e:
         return jsonify({"message": str(e)}), 500
 

@@ -80,6 +80,11 @@ const Tarea = () => {
             });
     };
 
+    const logout = () => {
+        localStorage.removeItem('isAuthenticated');
+        navigate('/login');
+    };
+
     return (
         <div className="flex h-screen bg-gray-900 text-white">
             {/* Sidebar */}
@@ -106,14 +111,17 @@ const Tarea = () => {
                             onClick={() => setMenuAbierto(!menuAbierto)}
                         >
                             <img
-                                src={ profilePicture || 'unknown.png' }
+                                src={profilePicture || 'unknown.png'}
                                 alt="Usuario"
                                 className="w-full h-full object-cover"
                             />
                         </div>
                         {menuAbierto && (
                             <div className="absolute right-0 top-full mt-2 w-48 bg-gray-700 rounded-md shadow-lg z-10">
-                                <div className="px-4 py-2 hover:bg-gray-600 flex items-center cursor-pointer text-red-400" onClick={() => navigate('/login')}>
+                                <div 
+                                    className="px-4 py-2 hover:bg-gray-600 flex items-center cursor-pointer text-red-400" 
+                                    onClick={logout}
+                                >
                                     Cerrar sesión
                                 </div>
                             </div>

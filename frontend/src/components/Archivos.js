@@ -12,7 +12,7 @@ const Archivos = () => {
     const token = localStorage.getItem('token');
     const API_URL = process.env.REACT_APP_API_URL;
     const AWS_IMAGE_UPLOAD_URL = process.env.REACT_APP_UPLOAD_IMAGE_URL
-    const AWS_FILE_UPLOAD_URL = process.env.REACT_APP_UPLOAD_FILE_URL
+    const AWS_DOC_UPLOAD_URL = process.env.REACT_APP_UPLOAD_DOC_URL
 
 
     // Funcion para convertir archivo a base64
@@ -63,7 +63,7 @@ const Archivos = () => {
             //Llamar a la funcion Lambda  segun el tipo de archivo
             const lambdaEndpoint = file.type.startsWith('image/')
                 ? `${AWS_IMAGE_UPLOAD_URL}/cargar_imagenes`
-                : `${AWS_FILE_UPLOAD_URL}/cargar_imagenes`;
+                : `${AWS_DOC_UPLOAD_URL}/cargar_documentos`;
 
             const lambdaResponse = await fetch(lambdaEndpoint, {
                 method: 'POST',
@@ -165,6 +165,11 @@ const Archivos = () => {
         window.open(file.file_url, '_blank');
     }
 
+    const logout = () => {
+        localStorage.removeItem('isAuthenticated');
+        navigate('/login');
+    };
+
     return (
         <div className="flex h-screen bg-gray-900 text-white">
             {/* Sidebar */}
@@ -195,7 +200,10 @@ const Archivos = () => {
                         </div>
                         {menuAbierto && (
                             <div className="absolute right-0 top-full mt-2 w-48 bg-gray-700 rounded-md shadow-lg z-10">
-                                <div className="px-4 py-2 hover:bg-gray-600 flex items-center cursor-pointer text-red-400" onClick={() => navigate('/login')}>
+                                <div 
+                                    className="px-4 py-2 hover:bg-gray-600 flex items-center cursor-pointer text-red-400"
+                                    onClick={logout}
+                                >
                                     <LogOut className="mr-2" size={16} /> Cerrar sesión
                                 </div>
                             </div>

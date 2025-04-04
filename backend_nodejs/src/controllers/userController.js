@@ -4,11 +4,10 @@ const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
 exports.register = async (req, res) => {
-    console.log(req.body);
     try {
         const { username, email, password } = req.body;
-        const profilePicture = req.file ? req.file.path : null;
-
+        const profilePicture = req.file ? req.file.location : null;
+        
         const existingUser = await User.findOne({ where: { username } });
         if (existingUser) {
             return res.status(400).json({ message: 'El nombre de usuario ya existe' });

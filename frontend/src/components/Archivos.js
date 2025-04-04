@@ -11,6 +11,22 @@ const Archivos = () => {
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
     const API_URL = process.env.REACT_APP_API_URL;
+    const AWS_IMAGE_UPLOAD_URL = process.env.REACT_APP_UPLOAD_IMAGE_URL
+    const AWS_FILE_UPLOAD_URL = process.env.REACT_APP_UPLOAD_FILE_URL
+
+
+    // Funcion para convertir archivo a base64
+    const fileToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => {
+                const base64String = reader.result.split(',')[1];
+                resolve(base64String);
+            };
+            reader.onerror = (error) => reject(error);
+        });
+    };
 
     useEffect(() => {
         const fetchArchivos = async () => {
@@ -41,20 +57,49 @@ const Archivos = () => {
         const file = event.target.files[0];
         if (!file) return;
 
-        const formData = new FormData();
-        formData.append('file', file);
-
         try {
-            const response = await fetch(`${API_URL}/api/files/upload/`, {
+            const fileContent = await fileToBase64(file);
+
+            //Llamar a la funcion Lambda  segun el tipo de archivo
+            const lambdaEndpoint = file.type.startsWith('image/')
+                ? `${AWS_IMAGE_UPLOAD_URL}/cargar_imagenes`
+                : `${AWS_FILE_UPLOAD_URL}/cargar_imagenes`;
+
+            const lambdaResponse = await fetch(lambdaEndpoint, {
                 method: 'POST',
                 headers: {
+                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: formData
+                body: JSON.stringify({
+                    fileName: file.name,
+                    fileContent: fileContent,
+                    fileType: file.type
+                })
             });
 
-            if (response.ok) {
-                const newFile = await response.json();
+            if (!lambdaResponse.ok) {
+                throw new Error('Error al subir el archivo a S3');
+            }
+
+            const { file_url } = await lambdaResponse.json();
+
+            //Registrar el archivo al backend
+            const fileResponse = await fetch(`${API_URL}/api/files/upload/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    file_name: file.name,
+                    file_type: file.type,
+                    file_url: file_url
+                })
+            });
+
+            if (fileResponse.ok) {
+                const newFile = await fileResponse.json();
                 setFiles([newFile, ...files]);
                 toast.success('¡Archivo subido exitosamente!', {
                     position: "top-right",
@@ -68,12 +113,12 @@ const Archivos = () => {
                     transition: Bounce,
                 });
             } else {
-                const errorData = await response.json();
-                console.error('Error al subir archivo:', errorData);
-                alert(errorData.error || 'Error al subir archivo. Inténtalo de nuevo.');
+                const errorData = await fileResponse.json();
+                console.error('Error al registrar archivo:', errorData);
+                alert(errorData.message || 'Error al registrar archivo. Inténtalo de nuevo.');
             }
         } catch (error) {
-            console.error('Error al subir archivo:', error);
+            console.error('Error en el proceso de subida:', error);
             alert('Error al subir archivo. Inténtalo de nuevo.');
         }
     };
@@ -115,6 +160,10 @@ const Archivos = () => {
         if (fileType.includes('text') || fileType.includes('doc')) return <FileText size={24} />;
         return <File size={24} />;
     };
+
+    const handleViewFile = (file) => {
+        window.open(file.file_url, '_blank');
+    }
 
     return (
         <div className="flex h-screen bg-gray-900 text-white">
@@ -207,16 +256,14 @@ const Archivos = () => {
                                     </div>
 
                                     <div className="flex border-t border-gray-700">
-                                        <a
-                                            href={file.file_url}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
+                                        <button
+                                            onClick={() => handleViewFile(file)}
                                             className="flex-1 py-3 text-blue-400 hover:bg-gray-700 transition-colors flex items-center justify-center"
                                             title="Ver archivo"
                                         >
                                             <Eye size={18} className="mr-1" />
                                             <span>Ver</span>
-                                        </a>
+                                        </button>
 
                                         <div className="w-px bg-gray-700"></div>
 

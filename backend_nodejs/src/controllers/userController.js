@@ -1,12 +1,10 @@
 const User = require('../models/userModel');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-require('dotenv').config();
 
 exports.register = async (req, res) => {
     try {
-        const { username, email, password } = req.body;
-        const profilePicture = req.file ? req.file.location : null;
+        const { username, email, password, profile_picture } = req.body;
         
         const existingUser = await User.findOne({ where: { username } });
         if (existingUser) {
@@ -20,7 +18,7 @@ exports.register = async (req, res) => {
             username,
             email,
             password: hashedPassword,
-            profile_picture: profilePicture,
+            profile_picture,
         });
 
         res.json(newUser);

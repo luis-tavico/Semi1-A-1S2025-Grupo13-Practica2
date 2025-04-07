@@ -32,10 +32,6 @@ app.register_blueprint(user_bp, url_prefix='/api/users')
 app.register_blueprint(task_bp, url_prefix='/api/tasks')
 app.register_blueprint(file_bp, url_prefix='/api/files')
 
-# Crear carpeta de uploads si no existe
-if not os.path.exists('uploads'):
-    os.makedirs('uploads')
-
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()

@@ -11,8 +11,8 @@ const Archivos = () => {
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
     const API_URL = process.env.REACT_APP_API_URL;
-    const AWS_IMAGE_UPLOAD_URL = process.env.REACT_APP_UPLOAD_IMAGE_URL
-    const AWS_DOC_UPLOAD_URL = process.env.REACT_APP_UPLOAD_DOC_URL
+    const UPLOAD_IMAGE_URL = process.env.REACT_APP_UPLOAD_IMAGE_URL
+    const UPLOAD_DOC_URL = process.env.REACT_APP_UPLOAD_DOC_URL
 
 
     // Funcion para convertir archivo a base64
@@ -59,11 +59,11 @@ const Archivos = () => {
 
         try {
             const fileContent = await fileToBase64(file);
-
+            
             //Llamar a la funcion Lambda  segun el tipo de archivo
             const lambdaEndpoint = file.type.startsWith('image/')
-                ? `${AWS_IMAGE_UPLOAD_URL}/cargar_imagenes`
-                : `${AWS_DOC_UPLOAD_URL}/cargar_documentos`;
+                ? `${UPLOAD_IMAGE_URL}/cargar_imagenes`
+                : `${UPLOAD_DOC_URL}/cargar_documentos`;
 
             const lambdaResponse = await fetch(lambdaEndpoint, {
                 method: 'POST',

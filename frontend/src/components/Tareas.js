@@ -67,7 +67,7 @@ const Tareas = () => {
     };
 
     const handleEditarTarea = (tarea) => {
-        navigate(`/editartarea/${tarea.id}`);
+        navigate(`/editartarea/${tarea.id}`, { state: { profilePicture } });
 
     };
 

@@ -28,7 +28,7 @@ TaskFlow + CloudDrive implementa una arquitectura cloud-native distribuida en do
 
 ### Arquitectura en AWS
 
-![Arquitectura AWS](https://ruta-a-diagrama-aws.png)
+![img](/imagenes/imagen1.png)
 
 La arquitectura en AWS se compone de:
 
@@ -49,7 +49,7 @@ El flujo de funcionamiento es el siguiente:
 
 ### Arquitectura en Azure
 
-![Arquitectura Azure](https://ruta-a-diagrama-azure.png)
+![img](/imagenes/imagen2.png)
 
 La arquitectura en Azure se compone de:
 
@@ -136,14 +136,15 @@ Este usuario es utilizado por las funciones Lambda para gestionar archivos.
 - **Configuración**: Alojamiento de sitio web estático habilitado
 - **Políticas**: Acceso público de lectura habilitado
 
-![Bucket Frontend](https://ruta-a-captura-bucket-frontend.png)
+![img](/imagenes/imagen3.png)
 
 #### Bucket para Archivos
 - **Nombre**: practica2semi1a1s2025Archivosg13
 - **Configuración**: Acceso público de lectura habilitado, CORS configurado para permitir solicitudes desde el frontend
 - **Políticas**: Configuradas para permitir acceso público a los archivos
 
-![Bucket Archivos](https://ruta-a-captura-bucket-archivos.png)
+![img](/imagenes/imagen4.png)
+
 
 ### Instancias EC2
 
@@ -154,7 +155,7 @@ Este usuario es utilizado por las funciones Lambda para gestionar archivos.
   - Puerto 3000 abierto para el Load Balancer
   - Puerto 22 (SSH) restringido a IPs específicas
 
-![EC2 Node.js](https://ruta-a-captura-ec2-nodejs.png)
+![img](/imagenes/imagen.png)
 
 #### Instancia Python
 - **AMI**: Amazon Linux 2
@@ -163,7 +164,7 @@ Este usuario es utilizado por las funciones Lambda para gestionar archivos.
   - Puerto 5000 abierto para el Load Balancer
   - Puerto 22 (SSH) restringido a IPs específicas
 
-![EC2 Python](https://ruta-a-captura-ec2-python.png)
+![img](/imagenes/imagen.png)
 
 ### Balanceador de Carga
 
@@ -174,7 +175,7 @@ Este usuario es utilizado por las funciones Lambda para gestionar archivos.
   - TG-Python: Apunta a la instancia Python en puerto 5000
 - **Algoritmo**: Round Robin
 
-![Load Balancer](https://ruta-a-captura-load-balancer.png)
+![img](/imagenes/imagen.png)
 
 ### Base de Datos RDS
 
@@ -184,7 +185,7 @@ Este usuario es utilizado por las funciones Lambda para gestionar archivos.
 - **Multi-AZ**: No (entorno de desarrollo)
 - **Acceso público**: No (solo accesible desde instancias EC2)
 
-![RDS](https://ruta-a-captura-rds.png)
+![img](/imagenes/imagen7.png)
 
 ### Funciones Lambda
 
@@ -195,8 +196,6 @@ Este usuario es utilizado por las funciones Lambda para gestionar archivos.
 - **Trigger**: API Gateway
 - **Políticas**: Acceso a S3 para escritura
 
-![Lambda Imágenes](https://ruta-a-captura-lambda-imagenes.png)
-
 #### Lambda para Carga de Documentos
 - **Runtime**: Python 3.8
 - **Memoria**: 256MB
@@ -204,7 +203,8 @@ Este usuario es utilizado por las funciones Lambda para gestionar archivos.
 - **Trigger**: API Gateway
 - **Políticas**: Acceso a S3 para escritura
 
-![Lambda Documentos](https://ruta-a-captura-lambda-documentos.png)
+![img](/imagenes/imagen5.png)
+
 
 ### Configuración de API Gateway
 
@@ -216,7 +216,7 @@ Este usuario es utilizado por las funciones Lambda para gestionar archivos.
   - POST /upload/document: Integrado con Lambda para documentos
 - **CORS**: Habilitado para permitir solicitudes desde el frontend
 
-![API Gateway](https://ruta-a-captura-api-gateway.png)
+![img](/imagenes/imagen6.png)
 
 ## Recursos Azure
 
